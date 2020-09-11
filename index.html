@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Reinforcement Learning</title>
+</head>
+<body>
+    <h1 id="top"></h1>
+    <br> <!-- space  -->
+    <p>
+        <h1>Introduction to Reinforcement Learning</h1>
+        <br>
+        <a href="https://medium.com/雞雞與兔兔的工程世界/機器學習-ml-note-reinforcement-learning-強化學習-dqn-實作atari-game-7f9185f833b0" target="_blank">introduction</a>
+        <br>
+        <strong>Reinforcement Learning</strong> is an aspect of <em>Machine learning</em> where an agent learns to behave in an environment, by performing certain actions and observing the rewards/results which it get from those actions.
+        <br>
+        <a href="https://www.kdnuggets.com/2018/03/5-things-reinforcement-learning.html" target="_blank">
+            <img src="/images/big_picture.png" width="500" alt="big_picture">
+        </a>
+    </p>
+    <p>
+        \(\cdot\) Agent is in a state \(S_{t}\).
+        <br>
+        \(\cdot\) Agent takes an action \(A_{t}\).
+        <br>
+        \(\cdot\) Environment changes:
+        <br>
+        &nbsp; \(\cdot\) A new state, \(S_{t+1}\)
+        <br>
+        &nbsp; \(\cdot\) A reward, \(R_{t+1}\) (positive+ or negative-)
+        <br>
+        \(\cdot\) The agent wants to choose actions to maximize their reward.
+        <br>
+        *** The agent should use probabilistic beliefs!
+        "What action is most likely to get me good rewards in my future?"***
+    </p>
+
+    <p> 
+        <h2>Terminology</h2>
+        <ol>
+            <li>Environment: Physical world in which the agent operates.</li>
+            <li>State: Current situation of the agent.</li>
+            <li>Reward: Feedback from the Environment</li>
+            <li>Policy: Method to map agent's state to actions</li>
+        </ol>
+    </p>
+
+    <p>
+        <h2>Markov Decision Processes(MDPs)</h2>
+        <img src="/images/mdps.png" width="500" alt="mdps">
+        <br>
+        \(\cdot\) Reward function \(R(s) = R_s\), can be positive, negative or 0.
+        <br>
+        &nbsp; Assumptions:
+        <ul>
+            <li>Finite context (no earlier states matter: we don't need to know what is t-1, t-2 and so on. All it matters is current state s)</li>
+            <li>Position invariance (all values of t act the same: t=5 or t=100) </li>
+        </ul>
+        [Also, for mdps, we generally let t go to infinity]
+    </p>
+
+    
+    <p>
+        <h2>MDP example</h2>
+        <img src="/images/mdps_example.png" width="500" alt="mds_example">
+        <br>
+        1. State(2,2) does not exist. 
+        <br>
+        2. The negative sign is a penalty. 
+        <br>
+        3. For \(P((1,1)|(1,1),up)=0.1,\) this would be the chance of accidentally going left, but that isn't a valid state. We'll model this as staying where we are.
+        <br>
+        4. Why  might we want to make all the other states have a slightly negative reward? Because we want to penalize the agent for not making the shortest path they can to the goal.
+        <br>
+    </p>
+
+    <p>
+        <h2>MDPs: Policies</h2>
+        <img src="/images/policies.png"  width="500" alt="policies">
+        <br>
+        1. The policy is a specifying what the agent will choose to do. The policy is the strategy that the agent has. The policy is going to be a function that you give it a state and it gives you an action. If I have the policy than I know what the agent is going to do.
+        <br>
+        2. For the reinforcement learning problem, the agent has to start to estimate transitional probabilities and estimate reward function values over time.
+        <br>
+        3. The optimal means the highest expected value of the reward over time. These rewards over time are going to be random variables.
+        <br>
+        4. Discount factor: we are going to discount future rewards, a reward in your near future is going to be worth more than a reward in the distant future. If you get a high reward today, that's better than getting that same reward tommorrow you're better off doing it today.
+    </p>
+
+    <p>
+        <h2>MDPs:State Value function</h2>
+        <img src="/images/states_val.png" width="500" alt="states_val">
+        <br>
+        1. The expected value is going to depend on the policy \(\pi\). The long term discounted reward is inside the bracket. These states \(s_t\) are going to be random variables, we don't know what states we end up in. This policy \(\pi\) tells us what actions the agent will take. If we know the actions the agent will take, then we can look up the relevant probabilities.
+        <br>
+        2. \(V^{\pi^*}(s)\) is at least as good as \(V^{\pi}(s)\) for all potential policies you might imagine and any particular state you might ask about, if there was ever a better action to take in a given state, the optimal policy is going to take that better action.
+        <br>
+        3. We want to find a \(\pi^*\), if we are able to find \(\pi^*\) that maximizes the state value function for all \(s\), then we'll have found a good policy, we'll be able to figure out what are the correct actions to take in this maze in order to reach our goal.
+    </p>
+
+    <p>
+        <h2>The Bellman Equation</h2>
+        <img src="/images/bellman.png" width="500" alt="bellman">
+        <br>
+        We know the distribution of \(s_1\) given \(s\), we know the distribution of \(s_2\) given \(s_1\) and so on. And so these are things that we could compute and we could start trying to run through this infinite sum. But computers tend not to do infinitely many things all at once. But we can simplify it as:
+        <br>
+        <img src="/images/bellman_2.png" width="500" alt="bellman_2">
+        <br>
+        1. \(s_1\) depends on the state \(s\) and if I know the state \(s\) and I know the policy \(\pi\), then I know what value \(s_1\) needs to be. \(s_2\) is still complicated.
+        <br>
+        2. This is a recurrence relation.
+    </p>
+
+    <p>
+        <h2>MDPs: Long-term discounted reward</h2>
+        <br>
+        <img src="/images/long_term.png" width= "500" alt="long_term_discounted">
+        <br>
+        1. In left hand side,the gamma is between 0 and 1, the leading coefficient gets smaller and smaller as t grows and this computes the overall long term discount reward sequence. Also, it has the discounted reward of one path. Just one particular sequence of states.
+        <br>
+        2. In right hand side, it is a value function, it has the discounted reward of all possible paths that this agent might end up in every single possible we could imagine.
+        <br>
+    </p>
+
+    <p>
+        <h2>Finding \(\pi^*\)(s): Policy Iteration</h2>
+        <img src="/images/policy.png" width="500" alt="policy">
+        <img src="/images/poli_1.png" width="500" alt="poli1">
+        <br>
+        1. \(V^\pi(s)\) and \(V^\pi(s')\) are unknown. the others are known constants.
+        <br>
+        2. For \(V^\pi(s)\), the first equation above, each s gives us another equation! If we have n different states,we have n equations with n unknowns! This is a system of n linear equations with n unknowns. (We could stop here, we got a system of linear equations but let's turn this into a linear algebra matrix problem)
+        <br>
+        3.If we can express this as a matrix problem, it becomes super simple to code it up, we just set up our mactrices and we pass them into some matrix math libraries and we get our answers.
+        <br>
+        4. For the equation below, on any iteration of this loop, on any of the terms in the summation where s does not equal to s prime, this indicator function equals to 0. On each value in the summation, if s equals s', then let's add an extra \(V^\pi(s)\), if s does not equal to s', then don't add anything extra.
+        <br>
+        5. For \(R(s)\), this is one equation for one value of s. Let's do all the equations at once. For example, let's make the left-hand side into a vector.
+        <img src="/images/poli_2.png" width="500" alt="poli_2">
+        <br>
+        The V is what we want, the V is \(V^\pi(s)\).
+    </p>
+
+    <p>
+        <h2>Two-state MDP</h2>
+        Solve the linear system of Bellman equations(by hand) to compute the state value function for the policy below.
+        <br>
+        <img src="/images/two_state1.png" width="500" alt="two_state1">
+        <br>
+        <img src="/images/two_state2.png" width="300" alt="two_state2">
+        <br>
+        After solving two equations with two unknowns:
+        <br>
+        <img src="/images/two_state3.png" width="300" alt="two_state3">
+    </p>
+
+    <p>
+        <h2>Policy Iteration: Improving the policy</h2>
+        <img src="/images/improve1.png" width="500" alt="improve1">
+        <br>
+        <img src="/images/improve2.png" width="500" alt="improve2">
+        <br>
+        1. In state 0, taking up arrow appears to be a better action. It's getting me a better long term value. The long term value of up arrow is better than the long term value of down arrow.
+        <br>
+        2. It used to be down arrow in my current policy as \(\pi(0)\) was down. And I'm gonna say \(\pi'(0)\) is up because looking at these Q functions, the up arrow was the better action.
+        <br>
+        3. This is an optimal policy
+        <br>
+        <img src="/images/improve3.png" width="300" alt="improve3">
+        <br>
+        Intuitive descriptions:
+        <br>
+         The optimal policy is what we computed. If I 'm in state 0, that's a bad state. It's a penalty state. I'm gonna choose the action that makes me get away from this penalty. I would not want to choose the down arrow, that would be a poor strategy, that would be a bad decision. And so I'm going to prefer up arrow, because that gives me a pretty good chance of ending up in the reward state and getting away from this penalty.
+        <br>
+        The state 1, which is a good state of reward. State 1 that gets me a high reward. I want to stay there. I would prefer not moving away from the state. The down arrow is the correct strategy.
+        <br>
+        <img src="/images/improve4.png" width="500" alt="improve4">
+    </p>
+
+    <p>
+        <h2>Value Iteration</h2>
+        <img src="/images/value1.png" width="600" alt="value1">
+        <br>
+        \(V^*(s)\) is the optimal value that any policy could hope to achieve. And this is going to be a value that we know it must exist. \(Q^*(s,a)\) is the optimal Q function that any policy can hope to achieve, and it is just the Q function achieved by an optimal policy.
+        <br>
+        <img src="/images/value2.png" width="500" alt="value2">
+        <br>
+        <img src="/images/value4.png" width="300" alt="value4">
+    </p>
+
+
+
+
+
+
+    <a href="#top">back to the top</a>
+    <h3>copyright &copy;</h3>
+
+</body>
+</html>
